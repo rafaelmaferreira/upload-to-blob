@@ -1,0 +1,39 @@
+name: Copy Files to Azure Storage
+
+on:
+  push:
+    branches:
+      - main  # Ou o branch de sua preferência
+  workflow_dispatch:
+
+jobs:
+  upload-to-storage:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout do código
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Configurar o Azure CLI
+      - name: Login to Azure
+        run: |
+          echo "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" > ~/.azure/connection_string
+
+      # Step 3: Entrar na pasta 'y/'
+      - name: Change Directory
+        run: |
+          cd path/
+          echo "Current working directory is: $(pwd)"
+
+      # Step 4: Copiar arquivos para o Azure Blob Storage
+      - name: Upload files to Azure Storage
+        run: |
+          az storage blob upload-batch \
+            --connection-string "$(cat ~/.azure/connection_string)" \
+            --source y/ \
+            --destination <container-name> \
+            --pattern "*"
+
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
